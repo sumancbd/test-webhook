@@ -6,3 +6,4 @@
 - [ ] I have self-reviewed my code.
 - [ ] All my code is following Codebuddy Coding Standards and Guidelines.
 - [ ] I have tested my code.
+- [ ] My PR title is meaningful and max 60 characters.
