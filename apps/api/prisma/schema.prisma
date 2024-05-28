@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  ADMIN
+  USER
+}
+
+enum GitProviderType {
+  GITHUB
+  GITLAB
+}
+
+enum PRStatus {
+  OPEN
+  MERGED
+  CLOSED
+}
+
+enum UserSignupMethod {
+  EMAIL
+  GOOGLE
+  FACEBOOK
+  APPLE
+}
+
+model User {
+  id               String            @id @default(auto()) @map("_id") @db.ObjectId
+  deletedAt        DateTime?
+  createdAt        DateTime?         @default(now())
+  updatedAt        DateTime?         @updatedAt
+  type             UserType
+  signupMethod     UserSignupMethod
+  email            String?
+  emailVerifiedAt  DateTime?
+  emailTemp        String?
+  password         String?
+  firstName        String?
+  lastName         String?
+  banned           Boolean           @default(false)
+  bannedAt         DateTime?
+  banReason        String?
+  bannedById       String?           @db.ObjectId
+  blockedIds       String[]          @db.ObjectId
+  blockedByIds     String[]          @db.ObjectId
+  deletedById      String?           @db.ObjectId
+  deletedBy        User?             @relation("DeleteByRelation", fields: [deletedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  deletedUsers     User[]            @relation("DeleteByRelation")
+  deleteAccountLog DeleteAccountLog?
+  notifications    Notification[]
+  uploads          Upload[]
+  slNo             Int?
+}
+
+model DeleteAccountLog {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime? @default(now())
+  reason    String?
+  comment   String?
+  userId    String    @unique @db.ObjectId
+  user      User      @relation(fields: [userId], references: [id])
+  slNo      Int?
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  forId     String   @db.ObjectId
+  for       User     @relation(references: [id], fields: [forId])
+  title     String
+  body      String
+  meta      Json
+  read      Boolean  @default(false)
+}
+
+enum UploadDriver {
+  LOCAL
+  AWS_S3
+}
+
+model Upload {
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  createdBy       User?        @relation(references: [id], fields: [createdById])
+  createdById     String?      @db.ObjectId
+  deletedAt       DateTime?
+  originalFileKey String?
+  fileKey         String?
+  previewKey      String?
+  driver          UploadDriver
+}
+
+model PullRequest {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  prId        String
+  url         String
+  projectId   String
+  projectName String
+  deletedAt   DateTime?
+  createdBy   String
+  status      PRStatus   @default(OPEN)
+  mergedBy    String?
+  mergedAt    DateTime?
+  createdAt   DateTime   @default(now())
+  feedback    Feedback[]
+}
+
+model Feedback {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  feedback      String
+  commentedBy   String
+  feedbackId    String
+  deletedAt     DateTime?
+  pullRequest   PullRequest? @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+  pullRequestId String?      @unique @db.ObjectId
+}
+
+model GitProvider {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  provider      GitProviderType @default(GITHUB)
+  webhookSecret String
+}
