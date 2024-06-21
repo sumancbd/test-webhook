@@ -11,7 +11,7 @@ export class GitlabFeedbackPort implements FeedbackAdapter {
     throw new Error('Method not implemented.');
   }
 
-  async create(_createFeedbackDto: Prisma.FeedbackCreateInput, prId: string): Promise<Feedback> {
+  async create(_createFeedbackDto: Prisma.FeedbackCreateInput, _prId: string): Promise<Feedback> {
     throw new Error('Method not implemented.');
   }
 

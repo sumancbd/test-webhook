@@ -1,11 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   HealthCheckService,
   HealthCheck,
   MemoryHealthIndicator,
   DiskHealthIndicator,
 } from '@nestjs/terminus';
+import { Public } from 'src/auth/decorators';
 
+@ApiTags('Health')
 @Controller('health')
 class HealthController {
   constructor(
@@ -14,7 +17,11 @@ class HealthController {
     private diskHealthIndicator: DiskHealthIndicator, 
   ) {}
 
+  @ApiOperation({
+    summary: 'Get server health',
+  })
   @Get()
+  @Public()
   @HealthCheck()
   check() {
     return this.healthCheckService.check([
