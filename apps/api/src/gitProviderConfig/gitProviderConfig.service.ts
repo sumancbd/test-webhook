@@ -1,19 +1,13 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { GitProvider, GitProviderType } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateGitProviderDto } from './gitProviderConfig.dto';
+import { CreateGitProviderConfigDto } from './gitProviderConfig.dto';
 
 @Injectable()
 export class GitProviderConfigService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(input: CreateGitProviderDto): Promise<GitProvider> {
-    const existingConfig = await this.findByGitProviderType(input.provider);
-
-    if (existingConfig) {
-      throw new ConflictException(`Git provider config for ${input.provider} already exist`);
-    }
-
+  async create(input: CreateGitProviderConfigDto): Promise<GitProvider> {
     const paymentProviderConfig = await this.prismaService.gitProvider.create({
       data: {
         provider: input.provider,

@@ -5,7 +5,7 @@ import { JoiValidationPipe } from 'src/joi-validation-pipe/joi-validation-pipe.i
 import { DateRangeDto, dateRangeSchema } from './pullRequestStatistic.dto';
 
 @ApiTags('PullRequestStatistic')
-@Controller('pullRequestStatisticService')
+@Controller('pullRequestStatistic')
 export class PullRequestStatisticController {
   constructor(private readonly pullRequestStatisticService: PullRequestStatisticService) {}
 

@@ -2,12 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { GitProviderType } from '@prisma/client';
 import * as Joi from 'joi';
 
-export const createGitProviderSchema = Joi.object({
+export const createGitProviderConfigSchema = Joi.object({
   provider: Joi.string().valid('GITHUB', 'GITLAB').required(),
   webhookSecret: Joi.string().required(),
 });
 
-export class CreateGitProviderDto {
+export class CreateGitProviderConfigDto {
   @ApiProperty({
     example: '123456',
   })
