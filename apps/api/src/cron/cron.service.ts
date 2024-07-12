@@ -29,8 +29,21 @@ export class CronService {
       return now.diff(createdAt, 'hour') > 3;
     });
 
-    if (oldPrs.length > 0) {
-      await this.sendSlackNotification(oldPrs);
+    const notReviewedPr = [];
+    for (const pr of oldPrs) {
+      const comments = await this.prisma.feedback.findMany({
+        where: {
+          pullRequest: {
+            id: pr.id,
+          },
+        },
+      });
+      if (comments.length === 0) {
+        notReviewedPr.push(pr);
+      }
+    }
+    if (notReviewedPr.length > 0) {
+      await this.sendSlackNotification(notReviewedPr);
     }
     this.logger.debug('Cron job finished');
   }
@@ -38,12 +51,12 @@ export class CronService {
   private async getPullRequests() {
     return await this.prisma.pullRequest.findMany({
       where: {
-        status:PRStatus.OPEN,
+        status: PRStatus.OPEN,
         deletedAt: {
           isSet: false,
         },
       },
-    })
+    });
   }
 
   private async sendSlackNotification(prs: any[]) {
@@ -54,11 +67,11 @@ export class CronService {
           `PR <${pr.url}|${pr.title}> created at ${dayjs(pr.createdAt).format('YYYY-MM-DD HH:mm:ss')} is older than 3 hours and not reviewed.`
       )
       .join('\n');
-  
+
     const payload = {
       text: message,
     };
-  
+
     try {
       await firstValueFrom(this.httpService.post(slackWebhookUrl, payload));
       this.logger.debug('Slack notification sent successfully');
@@ -66,5 +79,4 @@ export class CronService {
       this.logger.error('Error sending Slack notification', error);
     }
   }
-  
 }
